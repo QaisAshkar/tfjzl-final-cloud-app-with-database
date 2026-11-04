@@ -1,15 +1,49 @@
+# Online Course Platform with Exams (Django)
 
-**General Notes**
+A Django web app for online courses, where learners register, enroll in courses, read lessons, and **take multiple-choice exams** that are graded automatically.
 
-An `onlinecourse` app has already been provided in this repo upon which you will be adding a new assesement feature.
+Built as the final project of the IBM *Django Application Development with SQL and Databases* course. I added the whole assessment feature (models, views, templates and admin) to a starter course app.
 
-- If you want to develop the final project on Theia hosted by [IBM Developer Skills Network](https://labs.cognitiveclass.ai/), you will need to create the same project structure on Theia workspace and save it everytime you close the browser
-- Or you could develop the final project locally by setting up your own Python runtime and IDE
-- Hints for the final project are left on source code files
-- You may choose any cloud platform for deployment (default is IBM Cloud Foundry)
-- Depends on your deployment, you may choose any SQL database Django supported such as SQLite3, PostgreSQL, and MySQL (default is SQLite3)
+## Features
 
-**ER Diagram**
-For your reference, we have prepared the ER diagram design for the new assesement feature.
+- **User accounts.** Registration, login and logout using Django's auth system.
+- **Courses and enrollment.** Browse courses and enroll in them. Enrolled learners see the course lessons.
+- **Exams.** Each course has questions with multiple choices, and a question can have more than one correct answer.
+- **Automatic grading.** Submitted answers are saved as a `Submission`. The results page shows the score, highlights correct and incorrect choices, and shows pass or fail.
+- **Admin panel.** Instructors manage courses, lessons, questions and choices. Choices are edited inline with their question.
 
-![Onlinecourse ER Diagram](https://github.com/ibm-developer-skills-network/final-cloud-app-with-database/blob/master/static/media/course_images/onlinecourse_app_er.png)
+## Data model
+
+```
+Instructor ─┐
+            ├─< Course >─── Lesson
+Learner ────┘     │
+                  ├──< Enrollment >── User
+                  └──< Question ──< Choice
+                                       │
+                  Submission >─────────┘  (many-to-many: selected choices)
+```
+
+Models: `Instructor`, `Learner`, `Course`, `Lesson`, `Enrollment`, `Question`, `Choice`, `Submission`
+
+## Key views
+
+| View | What it does |
+| --- | --- |
+| `enroll` | Enrolls the logged-in user in a course |
+| `submit` | Collects the selected choices from the exam form and creates a `Submission` |
+| `extract_answers` | Reads the selected choice IDs from the POST data |
+| `show_exam_result` | Works out the total score against each question's correct answers and renders the results |
+
+## Running it
+
+```bash
+pip install -r requirements.txt
+python manage.py migrate
+python manage.py createsuperuser      # to add courses and exams in /admin
+python manage.py runserver            # http://localhost:8000/onlinecourse
+```
+
+## Tech stack
+
+Python · Django 4.2 · SQLite · Bootstrap · Gunicorn (deployment-ready with `Procfile` and `manifest.yml`)
